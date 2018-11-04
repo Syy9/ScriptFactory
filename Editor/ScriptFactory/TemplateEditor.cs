@@ -84,12 +84,18 @@ namespace ScriptFactory
                     var path = AssetDatabase.GetAssetPath(outputFolder);
                     if (AssetDatabase.IsValidFolder(path))
                         template.OutputPath = path;
+                    EditorUtility.SetDirty(template);
                 }
             }
 
             EditorGUILayout.Space();
-            template.NamespaceParam.Value = EditorGUILayout.TextField(TemplateKey.Namespace, template.NamespaceParam.Value);
-            template.SuperClassNameParam.Value = EditorGUILayout.TextField(TemplateKey.SuperClass, template.SuperClassNameParam.Value);
+            using (var check = new EditorGUI.ChangeCheckScope())
+            {
+                template.NamespaceParam.Value = EditorGUILayout.TextField(TemplateKey.Namespace, template.NamespaceParam.Value);
+                template.SuperClassNameParam.Value = EditorGUILayout.TextField(TemplateKey.SuperClass, template.SuperClassNameParam.Value);
+                if (check.changed)
+                    EditorUtility.SetDirty(template);
+            }
 
             EditorGUILayout.Space();
             serializedObject.Update();
@@ -103,10 +109,16 @@ namespace ScriptFactory
                 if (GUILayout.Button("Reset", EditorStyles.miniButton, GUILayout.Width(60)))
                 {
                     template.Format = Template.DefaultFormat;
+                    EditorUtility.SetDirty(template);
                 }
             }
-            
-            template.Format = EditorGUILayout.TextArea(template.Format, GUILayout.MinHeight(EditorGUIUtility.singleLineHeight * 10));
+
+            using (var check = new EditorGUI.ChangeCheckScope())
+            {
+                template.Format = EditorGUILayout.TextArea(template.Format, GUILayout.MinHeight(EditorGUIUtility.singleLineHeight * 10));
+                if (check.changed)
+                    EditorUtility.SetDirty(template);
+            }
 
             EditorGUILayout.Space();
             editorSerializedObject.Update();
@@ -143,6 +155,7 @@ namespace ScriptFactory
                         }
                         File.WriteAllText(path, BuildContent(outputParam), Encoding.UTF8);
                     }
+                    AssetDatabase.SaveAssets();
                     AssetDatabase.Refresh();
                 }
             }
