@@ -19,10 +19,10 @@ namespace ScriptFactory
         ReorderableList paramList;
         ReorderableList outputParamList;
         [SerializeField] List<OutputParam> rawOutputParamList = new List<OutputParam>() { new OutputParam() };
-        
+
         void OnEnable()
         {
-            template = (Template) target;
+            template = (Template)target;
             outputFolder = AssetDatabase.LoadAssetAtPath<DefaultAsset>(template.OutputPath);
             editorSerializedObject = new SerializedObject(this);
             var outputParamListProperty = editorSerializedObject.FindProperty("rawOutputParamList");
@@ -30,20 +30,23 @@ namespace ScriptFactory
             var paramListProperty = serializedObject.FindProperty("ParamList");
             paramList = new ReorderableList(serializedObject, paramListProperty);
             paramList.elementHeight = ParamDrawer.Height;
-            paramList.drawElementCallback = (rect, index, isActive, isFocused) => {
+            paramList.drawElementCallback = (rect, index, isActive, isFocused) =>
+            {
                 var property = paramListProperty.GetArrayElementAtIndex(index);
                 rect.height -= 4;
                 rect.y += 2;
                 EditorGUI.PropertyField(rect, property);
             };
 
-            paramList.drawHeaderCallback = (rect) => {
+            paramList.drawHeaderCallback = (rect) =>
+            {
                 EditorGUI.LabelField(rect, "Custom Param");
             };
 
-            paramList.onAddCallback = (list) => {
+            paramList.onAddCallback = (list) =>
+            {
                 paramListProperty.arraySize++;
-                list.index = paramListProperty.arraySize -1;
+                list.index = paramListProperty.arraySize - 1;
                 var property = paramListProperty.GetArrayElementAtIndex(list.index);
                 var key = property.FindPropertyRelative("Key");
                 key.stringValue = "#Key#";
@@ -59,13 +62,15 @@ namespace ScriptFactory
                 EditorGUI.PropertyField(rect, property);
             };
 
-            outputParamList.drawHeaderCallback = (rect) => {
+            outputParamList.drawHeaderCallback = (rect) =>
+            {
                 EditorGUI.LabelField(rect, "Output Param");
             };
 
-            outputParamList.onAddCallback = (list) => {
+            outputParamList.onAddCallback = (list) =>
+            {
                 outputParamListProperty.arraySize++;
-                list.index = outputParamListProperty.arraySize -1;
+                list.index = outputParamListProperty.arraySize - 1;
             };
         }
 
@@ -92,10 +97,10 @@ namespace ScriptFactory
             serializedObject.ApplyModifiedProperties();
 
             EditorGUILayout.Space();
-            using(new EditorGUILayout.HorizontalScope())
+            using (new EditorGUILayout.HorizontalScope())
             {
                 EditorGUILayout.LabelField("■Format", GUILayout.Width(60));
-                if(GUILayout.Button("Reset", EditorStyles.miniButton, GUILayout.Width(60)))
+                if (GUILayout.Button("Reset", EditorStyles.miniButton, GUILayout.Width(60)))
                 {
                     template.Format = Template.DefaultFormat;
                 }
@@ -120,7 +125,7 @@ namespace ScriptFactory
             }
 
             EditorGUILayout.Space();
-            using( new EditorGUI.DisabledScope(!EnableCreate()))
+            using (new EditorGUI.DisabledScope(!EnableCreate()))
             {
                 if (GUILayout.Button("Create"))
                 {
@@ -129,9 +134,9 @@ namespace ScriptFactory
                     foreach (var outputParam in rawOutputParamList)
                     {
                         var path = BuildFilePath(outputParam);
-                        if(System.IO.File.Exists((path)))
+                        if (System.IO.File.Exists((path)))
                         {
-                            if(!EditorUtility.DisplayDialog($"Script Factory ({current}/{max})", $"Already file exist. Replace ?\n{path}", "Replace", "Skip"))
+                            if (!EditorUtility.DisplayDialog($"Script Factory ({current}/{max})", $"Already file exist. Replace ?\n{path}", "Replace", "Skip"))
                             {
                                 continue;
                             }
@@ -145,7 +150,7 @@ namespace ScriptFactory
 
         bool EnableCreate()
         {
-            return !string.IsNullOrEmpty(template.NamespaceParam.Value) && 
+            return !string.IsNullOrEmpty(template.NamespaceParam.Value) &&
                 !string.IsNullOrEmpty(template.OutputPath) &&
                 !rawOutputParamList.Any(p => string.IsNullOrEmpty(p.ClassName)) &&
                 rawOutputParamList.Count >= 1;
